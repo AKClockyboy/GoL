@@ -13,14 +13,30 @@ def grid(n):
 
 def array(grid,n):
 
-    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.5,0.5))
+    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.7,0.3))
+
     return(grid)
 
 def glide(grid,n):
 
-    glide = np.array([[0, 1, 0], [0, 0, 1], [1, 1, 1]])
+    grid = np.zeros((n,n))
 
-    return(glide)
+    for i in range(3):
+        if i == 0:
+            grid[i,0] = 0
+            grid[i,1] = 0
+            grid[i,2] = 1
+        elif i == 1:
+            grid[i,0] = 1
+            grid[i,1] = 0
+            grid[i,2] = 1
+        elif i == 2:
+            grid[i,0] = 0
+            grid[i,1] = 1
+            grid[i,2] = 1
+    print(grid)
+
+    return(grid)
 
 def anime(data, iterations):
     #data is 3D numpy array
@@ -30,7 +46,12 @@ def anime(data, iterations):
     screendata = data[0]
     fig, ax = plt.subplots()
     matrix = ax.matshow(screendata, cmap = 'magma')
-    ani = matplotlib.animation.FuncAnimation(fig,update,frames=iterations,interval=100)
+    ani = matplotlib.animation.FuncAnimation(fig,update,frames=iterations,interval=2)
+    plt.show()
+
+def plot(x, y):
+
+    plt.plot(x, y)
     plt.show()
 
 def GoL(sweep, SpinArray, n):
@@ -56,22 +77,36 @@ def GoL(sweep, SpinArray, n):
 
     return(newspin)
 
+def com(grid, n):
+    x = np.array([0,0])
+    for i in range(n):
+        for j in range(n):
+            if grid[i,j] == 1:
+                x += [i,j]
+    #print(x)
+    return(x/np.sum(grid))
+
 def main():
 
-    sweep = 10000
-    n = 100
-
+    sweep = 100
+    n = 1000
+    x = []
+    y = []
+    t = []
     g = grid(n)
     emptar = np.zeros((sweep,n,n))
 
-    SpinArray = array(grid,n)
+    SpinArray = glide(grid,n)
 
     for i in range(sweep):
 
         emptar[i] = GoL(sweep, SpinArray, n)
-
+        r = com(SpinArray, n)
+        x.append(r[0])
+        y.append(r[1])
+        t.append(i)
         SpinArray = emptar[i]
 
     anime(emptar, sweep)
-
+    plot(t, y)
 main()
