@@ -7,16 +7,13 @@ import random
 from matplotlib import pyplot as plt
 import matplotlib.animation
 
-ALIVE = 1
-DEED = 0
-
 def grid(n):
 
     grid = np.zeros((n,n))
 
 def array(grid,n):
 
-    grid =+ np.random.choice(a=(0,1), size = (n,n), p = (0.93,0.07))
+    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.5,0.5))
     return(grid)
 
 def glide(grid,n):
@@ -38,32 +35,30 @@ def anime(data, iterations):
 
 def GoL(sweep, SpinArray, n):
 
-    newspin = SpinArray
+    newspin = np.copy(SpinArray)
+
     for i in range(n):
         for j in range(n):
-            sum = ((SpinArray[i, (j-1)%n] + SpinArray[i, (j+1)%n] +
-                         SpinArray[(i-1)%n, j] + SpinArray[(i+1)%n, j] +
-                         SpinArray[(i-1)%n, (j-1)%n] + SpinArray[(i-1)%n, (j+1)%n] +
-                         SpinArray[(i+1)%n, (j-1)%n] + SpinArray[(i+1)%n, (j+1)%n]))
+            sum = ((SpinArray[i, (j-1)] + SpinArray[i, (j+1)%n] + SpinArray[(i-1), j] + SpinArray[(i+1)%n, j] + SpinArray[(i-1), (j-1)] + SpinArray[(i-1), (j+1)%n] +  SpinArray[(i+1)%n, (j-1)] + SpinArray[(i+1)%n, (j+1)%n]))
 
-
-            if SpinArray[i, j]  == ALIVE:
+            if SpinArray[i, j]  == 1:
                 if (sum < 2) or (sum > 3):
-                    newspin[i, j] = DEED
-                if sum == 2 or sum == 3:
-                    newspin[i,j] = ALIVE
+                    newspin[i, j] = 0
+                elif sum == 2 or sum == 3:
+                    newspin[i,j] = 1
 
-            if SpinArray[i, j] == DEED:
+            elif SpinArray[i, j] == 0:
                 if sum == 3:
-                    newspin[i, j] = ALIVE
-                else:
-                    newspin[i, j] = DEED
+                    newspin[i, j] = 1
+                elif sum != 3:
+                    newspin[i, j] = 0
+
 
     return(newspin)
 
 def main():
-    
-    sweep = 100
+
+    sweep = 10000
     n = 100
 
     g = grid(n)
@@ -72,7 +67,10 @@ def main():
     SpinArray = array(grid,n)
 
     for i in range(sweep):
+
         emptar[i] = GoL(sweep, SpinArray, n)
+
+        SpinArray = emptar[i]
 
     anime(emptar, sweep)
 
