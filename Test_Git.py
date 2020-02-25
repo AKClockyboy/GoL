@@ -17,6 +17,12 @@ def array(grid,n):
 
     return(grid)
 
+def SIRSarray(grid,n):
+
+    grid = np.random.choice(a=(-1,0,1), size = (n,n), p = (0.6, 0.3, 0.1))
+
+    return(grid)
+
 def glide(grid,n):
 
     grid = np.zeros((n,n))
@@ -34,6 +40,7 @@ def glide(grid,n):
             grid[i,0] = 0
             grid[i,1] = 1
             grid[i,2] = 1
+    print("Look at this glidey wee man : ")
     print(grid)
 
     return(grid)
@@ -46,13 +53,22 @@ def anime(data, iterations):
     screendata = data[0]
     fig, ax = plt.subplots()
     matrix = ax.matshow(screendata, cmap = 'magma')
-    ani = matplotlib.animation.FuncAnimation(fig,update,frames=iterations,interval=2)
+    ani = matplotlib.animation.FuncAnimation(fig,update,frames=iterations,interval=30)
     plt.show()
 
 def plot(x, y):
 
     plt.plot(x, y)
     plt.show()
+
+def trial(p1):
+
+    heads = 0
+
+    if random.uniform(0,1) <= p1:
+        heads += 1
+
+    return(heads)
 
 def GoL(sweep, SpinArray, n):
 
@@ -77,6 +93,34 @@ def GoL(sweep, SpinArray, n):
 
     return(newspin)
 
+def SIRS(sweep, SpinArray, p1, p2, p3, n):
+
+    h1 = trial(p1)
+    h2 = trial(p2)
+    h3 = trial(p3)
+
+    for i in range(100):
+
+        for i in range(n):
+            for j in range(n):
+
+                sum = SpinArray[i, (j-1)] + SpinArray[i, (j+1)%n] + SpinArray[(i-1), j] + SpinArray[(i+1)%n, j]
+
+                if SpinArray[i, j] == 0:
+                    if SpinArray[i, (j-1)] == 1 or SpinArray[i, (j+1)%n] == 1 or SpinArray[(i-1), j] == 1 or SpinArray[(i+1)%n, j] == 1:
+                        if h1 == 1:
+                            SpinArray[i, j] == 1
+
+                elif SpinArray[i, j] == 1:
+                    if h2 == 1:
+                        SpinArray[i, j] == -1
+
+                elif SpinArray[i, j] == -1:
+                    if h2 == 1:
+                        SpinArray[i, j] == 0
+
+    return(SpinArray)
+
 def com(grid, n):
     x = np.array([0,0])
     for i in range(n):
@@ -88,25 +132,35 @@ def com(grid, n):
 
 def main():
 
-    sweep = 100
-    n = 1000
+    sweep = 1000
+    n = 50
     x = []
     y = []
     t = []
+
+    p1 = 0.5
+    p2 = 0.5
+    p3 = 0.5
+
     g = grid(n)
+
     emptar = np.zeros((sweep,n,n))
 
-    SpinArray = glide(grid,n)
+    SpinArray = SIRSarray(grid,n)
 
     for i in range(sweep):
 
-        emptar[i] = GoL(sweep, SpinArray, n)
+        emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
+        #emptar[i] = GOL(sweep, SpinArray, n)
         r = com(SpinArray, n)
         x.append(r[0])
         y.append(r[1])
         t.append(i)
         SpinArray = emptar[i]
 
+    #animate!
     anime(emptar, sweep)
-    plot(t, y)
+
+    #plot displacement vs time for glider
+    #plot(t, x)
 main()
