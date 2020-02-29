@@ -13,7 +13,7 @@ def grid(n):
 
 def array(grid,n):
 
-    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.7,0.3))
+    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.75,0.25))
 
     return(grid)
 
@@ -72,11 +72,20 @@ def trial(p1):
 
 def histo(a):
 
-    plt.hist(a, bins = 'auto')
+    plt.hist(a, bins=20)
     plt.title("Histogram")
     plt.show()
 
     return()
+
+def convertion(SpinArray, n):
+    for i in range(n):
+        for j in range(n):
+            if SpinArray[i, j] == 1:
+                SpinArray[i, j] = 0
+
+    x = -np.sum(SpinArray)
+    return(x)
 
 def GoL(sweep, SpinArray, n):
 
@@ -141,24 +150,23 @@ def com(grid, n):
     return(x/np.sum(grid))
 
 def main():
-    if len(sys.argv)!=4:
+    if len(sys.argv)!=7:
         print("Wrong number of arguments.")
-        print("Usage: " + sys.argv[0] + " 'gol', 'golglide' or 'sir' " + "temperature" + "system_size")
+        print("Usage: " + sys.argv[0] + " 'gol', 'golglide', 'CountDooku', 'sir' " + "sweep" + " system_size" + " p1" + " p2" + " p3")
         quit()
 
     else:
         dynamic = (sys.argv[1])
         sweep = int(sys.argv[2])
         n = int(sys.argv[3])
+        p1 = float(sys.argv[4])
+        p2 = float(sys.argv[5])
+        p3 = float(sys.argv[6])
 
 
     x = []
     y = []
     t = []
-
-    p1 = 0.5
-    p2 = 0.5
-    p3 = 0.5
 
     g = grid(n)
 
@@ -208,10 +216,10 @@ def main():
 
     if dynamic == 'CountDooku':
 
-        time_list = np.zeros(100)
+        time_list = np.zeros(50)
         print(time_list)
 
-        for j in range(100):
+        for j in range(50):
             emptar = np.zeros((n,n))
             SpinArray = array(grid,n)
             t = 0
@@ -237,61 +245,59 @@ def main():
                 SpinArray = emptar
 
             time_list[j] = t
-        print(time_list)
-
         histo(time_list)
 
     if dynamic == 'sir':
-
         SpinArray = SIRSarray(grid, n)
-
         for i in range(sweep):
-
             emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
-
             SpinArray = emptar[i]
-
-            #animate!
-
-            plt.cla()
-            im=plt.imshow(SpinArray, animated=True)
-            plt.draw()
-            plt.pause(0.0001)
-
+        #animate!
+        anime(emptar, sweep)
         plt.close()
 
+    if dynamic == 'sirheat':
+        SpinArray = SIRSarray(grid, n)
+        p1 = 0.1
+        p3 = 0.1
+        I1 = 0
+
+        for l in range(4):
+            p1 += 0.1
+            p3 = 0.1
+            for m in range(4):
+                p3 += 0.1
+
+                I2 = []
+                for i in range(sweep):
+                    emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
+                    SpinArray = emptar[i]
+                    I2.append(convertion(SpinArray, n))
+                I1 = (sum((I2/sweep)/n))
 
 
-
-
+        plt.imshow(a, cmap='hot', interpolation='nearest')
+        plt.show()
 
 
 
 
 
     """    for i in range(sweep):
-
         #emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
-
         emptar[i] = GoL(sweep, SpinArray, n)
-
         #centre of mass calculations
         #r = com(SpinArray, n)
         #x.append(r[0])
         #y.append(r[1])
         #t.append(i)
-
         SpinArray = emptar[i]
-
         #animate!
-
         plt.cla()
         im=plt.imshow(SpinArray, animated=True)
         plt.draw()
         plt.pause(0.0001)
-
     plt.close()
-
     histo(sum, sweep)
     #plot displacement vs time for glider
     #plot(t, x)"""
