@@ -5,6 +5,7 @@ import cmath
 import scipy
 import random
 from matplotlib import pyplot as plt
+
 import matplotlib.animation
 
 def grid(n):
@@ -81,10 +82,10 @@ def histo(a):
 def convertion(SpinArray, n):
     for i in range(n):
         for j in range(n):
-            if SpinArray[i, j] == 1:
+            if SpinArray[i, j] == -1:
                 SpinArray[i, j] = 0
 
-    x = -np.sum(SpinArray)
+    x = np.sum(SpinArray)
     return(x)
 
 def GoL(sweep, SpinArray, n):
@@ -146,7 +147,6 @@ def com(grid, n):
         for j in range(n):
             if grid[i,j] == 1:
                 x += [i,j]
-    #print(x)
     return(x/np.sum(grid))
 
 def main():
@@ -171,8 +171,8 @@ def main():
     g = grid(n)
 
     emptar = np.zeros((sweep,n,n))
-    sum = np.zeros((sweep))
-
+    s = np.zeros((9,9))
+    print(s)
 
     if dynamic == 'gol':
         SpinArray = array(grid,n)
@@ -258,25 +258,46 @@ def main():
 
     if dynamic == 'sirheat':
         SpinArray = SIRSarray(grid, n)
-        p1 = 0.1
-        p3 = 0.1
+        p1 = 1
         I1 = 0
-
-        for l in range(4):
-            p1 += 0.1
+        for l in range(9):
+            p1 -= 0.1
             p3 = 0.1
-            for m in range(4):
+            for m in range(9):
                 p3 += 0.1
+                SpinArray = SIRSarray(grid, n)
 
                 I2 = []
+
+                c = 0
                 for i in range(sweep):
-                    emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
-                    SpinArray = emptar[i]
-                    I2.append(convertion(SpinArray, n))
-                I1 = (sum((I2/sweep)/n))
+
+                    if i >= 100:
+
+                        s2 = convertion(SpinArray, n)
+
+                        emptar = SIRS(sweep, SpinArray, p1, p2, p3, n)
+
+                        SpinArray = emptar
+
+                        s1 = convertion(SpinArray, n)
+                        I2.append(s1)
 
 
-        plt.imshow(a, cmap='hot', interpolation='nearest')
+                        if s1 == s2:
+                            c += 1
+                        else:
+                            c = 0
+                        if c == 10:
+                            break
+
+
+                s[l, m] = (sum(I2)/len(I2))
+                print(str(l))
+
+        plt.imshow(s, cmap='plasma')
+        #print(s)
+        plt.colorbar()
         plt.show()
 
 
