@@ -66,14 +66,14 @@ def trial(p1):
 
     heads = 0
 
-    if random.uniform(0,1) <= p1:
+    if random.uniform(0,1) < p1:
         heads += 1
 
     return(heads)
 
 def histo(a):
 
-    plt.hist(a, bins=20)
+    plt.hist(a, bins=30)
     plt.title("Histogram")
     plt.show()
 
@@ -141,6 +141,58 @@ def SIRS(sweep, SpinArray, p1, p2, p3, n):
 
     return(SpinArray)
 
+def SIRSinf(sweep, SpinArray, p1, p2, p3, n, inf):
+
+    #print(str(h1) + " and" + str(h2) + " and" + str(h3))
+
+    for l in range(n*n):
+
+        #sum = SpinArray[i, (j-1)] + SpinArray[i, (j+1)%n] + SpinArray[(i-1), j] + SpinArray[(i+1)%n, j]
+
+        i = random.choice(list(range(0, n)))
+        j = random.choice(list(range(0, n)))
+
+
+        if SpinArray[i, j] == 0:
+            if SpinArray[i, (j-1)%n] == 1 or SpinArray[i, (j+1)%n] == 1 or SpinArray[(i-1)%n, j] == 1 or SpinArray[(i+1)%n, j] == 1:
+                if trial(p1) == 1:
+                    SpinArray[i, j] = 1
+
+
+        elif SpinArray[i, j] == 1:
+            if trial(p2) == 1:
+                SpinArray[i, j] = -1
+
+
+        elif SpinArray[i, j] == -1:
+            if trial(p3) == 1:
+                SpinArray[i, j] = 0
+
+    return(SpinArray)
+
+def SIRSmod(sweep, SpinArray, p1, p2, p3, n):
+
+    for l in range(n*n):
+
+        #sum = SpinArray[i, (j-1)] + SpinArray[i, (j+1)%n] + SpinArray[(i-1), j] + SpinArray[(i+1)%n, j]
+
+        i = random.choice(list(range(0, n)))
+        j = random.choice(list(range(0, n)))
+
+
+        if SpinArray[i, j] == 0:
+            if SpinArray[i, (j-1)%n] == 1 or SpinArray[i, (j+1)%n] == 1 or SpinArray[(i-1)%n, j] == 1 or SpinArray[(i+1)%n, j] == 1:
+                if trial(p1) == 1:
+                    SpinArray[i, j] = 1
+
+
+        elif SpinArray[i, j] == 1:
+            if trial(p2) == 1:
+                SpinArray[i, j] = -1
+
+
+    return(SpinArray)
+
 def com(grid, n):
     x = np.array([0,0])
     for i in range(n):
@@ -171,7 +223,7 @@ def main():
     g = grid(n)
 
     emptar = np.zeros((sweep,n,n))
-    s = np.zeros((9,9))
+    s = np.zeros((21,21))
     print(s)
 
     if dynamic == 'gol':
@@ -214,7 +266,7 @@ def main():
         #plot displacement vs time for glider
         plot(t, x)
 
-    if dynamic == 'CountDooku':
+    if dynamic == 'countdooku':
 
         time_list = np.zeros(50)
         print(time_list)
@@ -257,43 +309,39 @@ def main():
         plt.close()
 
     if dynamic == 'sirheat':
-        SpinArray = SIRSarray(grid, n)
-        p1 = 1
-        I1 = 0
-        for l in range(9):
-            p1 -= 0.1
-            p3 = 0.1
-            for m in range(9):
-                p3 += 0.1
-                SpinArray = SIRSarray(grid, n)
 
+        SpinArray = SIRSarray(grid, n)
+
+        p1 = 1.05
+
+        I1 = 0
+        for l in range(21):
+
+            p1 -= 0.05
+
+            p3 = -0.05
+
+            for m in range(21):
+
+                p3 += 0.05
+
+                print("p1 is: " + str(p1) + " p2 is : " + str(p3))
+
+                SpinArray = SIRSarray(grid, n)
                 I2 = []
 
-                c = 0
+
                 for i in range(sweep):
 
-                    if i >= 100:
+                    emptar = SIRSinf(sweep, SpinArray, p1, p2, p3, n, I2)
 
-                        s2 = convertion(SpinArray, n)
+                    SpinArray = emptar
 
-                        emptar = SIRS(sweep, SpinArray, p1, p2, p3, n)
+                    if i>100:
 
-                        SpinArray = emptar
+                        I2.append(np.mean(convertion(SpinArray, n)))
 
-                        s1 = convertion(SpinArray, n)
-                        I2.append(s1)
-
-
-                        if s1 == s2:
-                            c += 1
-                        else:
-                            c = 0
-                        if c == 10:
-                            break
-
-
-                s[l, m] = (sum(I2)/len(I2))
-                print(str(l))
+                s[l, m] = (sum(I2)/len(I2))/n
 
         plt.imshow(s, cmap='plasma')
         #print(s)
@@ -301,10 +349,8 @@ def main():
         plt.show()
 
 
-
-
-
-    """    for i in range(sweep):
+    """
+        for i in range(sweep):
         #emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
         emptar[i] = GoL(sweep, SpinArray, n)
         #centre of mass calculations
@@ -321,5 +367,8 @@ def main():
     plt.close()
     histo(sum, sweep)
     #plot displacement vs time for glider
-    #plot(t, x)"""
+    #plot(t, x)
+
+    """
+
 main()
