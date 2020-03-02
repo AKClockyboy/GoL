@@ -41,6 +41,7 @@ def glide(grid,n):
             grid[i,0] = 0
             grid[i,1] = 1
             grid[i,2] = 1
+
     print("Look at this glidey wee man : ")
     print(grid)
 
@@ -86,6 +87,7 @@ def convertion(SpinArray, n):
                 SpinArray[i, j] = 0
 
     x = np.sum(SpinArray)
+
     return(x)
 
 def GoL(sweep, SpinArray, n):
@@ -216,15 +218,9 @@ def main():
         p3 = float(sys.argv[6])
 
 
-    x = []
-    y = []
-    t = []
-
     g = grid(n)
 
     emptar = np.zeros((sweep,n,n))
-    s = np.zeros((21,21))
-    print(s)
 
     if dynamic == 'gol':
         SpinArray = array(grid,n)
@@ -245,6 +241,10 @@ def main():
     if dynamic == 'golglide':
 
         SpinArray = glide(grid,n)
+
+        x = []
+        y = []
+        t = []
 
         for i in range(sweep):
 
@@ -312,6 +312,9 @@ def main():
 
         SpinArray = SIRSarray(grid, n)
 
+        s = np.zeros((21,21))
+        print(s)
+
         p1 = 1.05
 
         I1 = 0
@@ -319,13 +322,17 @@ def main():
 
             p1 -= 0.05
 
+            p1 = round(p1, 3)
+
             p3 = -0.05
 
             for m in range(21):
 
                 p3 += 0.05
 
-                print("p1 is: " + str(p1) + " p2 is : " + str(p3))
+                p3 = round(p3, 3)
+
+                print("p1 is: " + str(p1) + " and p2 is : " + str(p3))
 
                 SpinArray = SIRSarray(grid, n)
                 I2 = []
@@ -333,42 +340,93 @@ def main():
 
                 for i in range(sweep):
 
-                    emptar = SIRSinf(sweep, SpinArray, p1, p2, p3, n, I2)
+                    emptar[i] = SIRSinf(sweep, SpinArray, p1, p2, p3, n, I2)
 
-                    SpinArray = emptar
+                    SpinArray = emptar[i]
 
-                    if i>100:
+                    if i > 100:
 
                         I2.append(np.mean(convertion(SpinArray, n)))
 
-                s[l, m] = (sum(I2)/len(I2))/n
+                s[l, m] = (np.mean(I2))/(n*n)
 
-        plt.imshow(s, cmap='plasma')
+        plt.imshow(s, cmap='plasma', extent=(0, 1, 0, 1))
+        plt.colorbar()
+        plt.show()
+
+    if dynamic == 'sirvar':
+
+        SpinArray = SIRSarray(grid, n)
+
+        s = np.zeros((21,21))
+        print(s)
+
+        p1 = 1.05
+
+        I1 = 0
+        for l in range(21):
+
+            p1 -= 0.05
+            p1 = round(p1, 3)
+            p3 = -0.05
+
+            for m in range(21):
+
+                p3 += 0.05
+                p3 = round(p3, 3)
+                print("p1 is: " + str(p1) + " p2 is : " + str(p3))
+                SpinArray = SIRSarray(grid, n)
+                I2 = []
+
+
+                for i in range(sweep):
+
+                    emptar[i] = SIRSinf(sweep, SpinArray, p1, p2, p3, n, I2)
+
+                    SpinArray = emptar[i]
+
+                    if i > 100:
+
+                        I2.append(np.mean(convertion(SpinArray, n)))
+
+                s[l, m] = np.var(I2)/(n*n)
+
+        plt.imshow(s, cmap='plasma', extent = (0,1,0,1))
         #print(s)
         plt.colorbar()
         plt.show()
 
+    if dynamic == 'sirvar2':
+        p3 = 0.5
+        p2 = 0.5
+        p1 = 0.15
 
-    """
-        for i in range(sweep):
-        #emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
-        emptar[i] = GoL(sweep, SpinArray, n)
-        #centre of mass calculations
-        #r = com(SpinArray, n)
-        #x.append(r[0])
-        #y.append(r[1])
-        #t.append(i)
-        SpinArray = emptar[i]
-        #animate!
-        plt.cla()
-        im=plt.imshow(SpinArray, animated=True)
-        plt.draw()
-        plt.pause(0.0001)
-    plt.close()
-    histo(sum, sweep)
-    #plot displacement vs time for glider
-    #plot(t, x)
+        var_list = []
+        p1_list = []
 
-    """
+        for l in range(20):
+
+            p1 += 0.02
+            p1 = round(p1, 3)
+
+            print("p1 is: " + str(p1))
+
+            SpinArray = SIRSarray(grid, n)
+
+            I2 = []
+
+            p1_list.append(p1)
+            for i in range(sweep):
+                emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
+                SpinArray = emptar[i]
+
+                if i > 100:
+
+                    I2.append(np.mean(convertion(SpinArray, n)))
+
+            var_list.append(np.var(I2)/(n*n))
+
+        plot(p1_list, var_list)
+
 
 main()
