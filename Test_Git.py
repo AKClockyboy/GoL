@@ -14,7 +14,7 @@ def grid(n):
 
 def array(grid,n):
 
-    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.75,0.25))
+    grid = np.random.choice(a=(0,1), size = (n,n), p = (0.5,0.5))
 
     return(grid)
 
@@ -23,6 +23,12 @@ def SIRSarray(grid,n):
     grid = np.random.choice(a=(-1,0,1), size = (n,n), p = (1/3, 1/3, 1/3))
 
     return(grid)
+
+def SIRSarray_with_imun(grid, n, f):
+
+        grid = np.random.choice(a=(-1,0,1,2), size = (n,n), p = (1/3, 1/3, 1/3, f))
+
+        return(grid)
 
 def glide(grid,n):
 
@@ -74,7 +80,7 @@ def trial(p1):
 
 def histo(a):
 
-    plt.hist(a, bins=30)
+    plt.hist(a, bins = 'auto')
     plt.title("Histogram")
     plt.show()
 
@@ -172,29 +178,6 @@ def SIRSinf(sweep, SpinArray, p1, p2, p3, n, inf):
 
     return(SpinArray)
 
-def SIRSmod(sweep, SpinArray, p1, p2, p3, n):
-
-    for l in range(n*n):
-
-        #sum = SpinArray[i, (j-1)] + SpinArray[i, (j+1)%n] + SpinArray[(i-1), j] + SpinArray[(i+1)%n, j]
-
-        i = random.choice(list(range(0, n)))
-        j = random.choice(list(range(0, n)))
-
-
-        if SpinArray[i, j] == 0:
-            if SpinArray[i, (j-1)%n] == 1 or SpinArray[i, (j+1)%n] == 1 or SpinArray[(i-1)%n, j] == 1 or SpinArray[(i+1)%n, j] == 1:
-                if trial(p1) == 1:
-                    SpinArray[i, j] = 1
-
-
-        elif SpinArray[i, j] == 1:
-            if trial(p2) == 1:
-                SpinArray[i, j] = -1
-
-
-    return(SpinArray)
-
 def com(grid, n):
     x = np.array([0,0])
     for i in range(n):
@@ -268,10 +251,13 @@ def main():
 
     if dynamic == 'countdooku':
 
-        time_list = np.zeros(50)
+        time_list = np.zeros(100)
         print(time_list)
 
-        for j in range(50):
+        for j in range(100):
+
+            print(j)
+
             emptar = np.zeros((n,n))
             SpinArray = array(grid,n)
             t = 0
@@ -291,12 +277,20 @@ def main():
                 else:
                     c = 0
 
+                if i > 2000:
+
+                    break
+
                 if c == 5:
+
                     t = i
+
+                    break
 
                 SpinArray = emptar
 
             time_list[j] = t
+
         histo(time_list)
 
     if dynamic == 'sir':
@@ -322,7 +316,7 @@ def main():
 
             p1 -= 0.05
 
-            p1 = round(p1, 3)
+            p1 = round(p1, 4)
 
             p3 = -0.05
 
@@ -330,7 +324,7 @@ def main():
 
                 p3 += 0.05
 
-                p3 = round(p3, 3)
+                p3 = round(p3, 4)
 
                 print("p1 is: " + str(p1) + " and p2 is : " + str(p3))
 
@@ -344,13 +338,15 @@ def main():
 
                     SpinArray = emptar[i]
 
-                    if i > 100:
+                    if i > 500:
 
-                        I2.append(np.mean(convertion(SpinArray, n)))
+                        I2.append(convertion(SpinArray, n))
+
+                print("L is " + str(l) + " M is " + str(m))
 
                 s[l, m] = (np.mean(I2))/(n*n)
 
-        plt.imshow(s, cmap='plasma', extent=(0, 1, 0, 1))
+        plt.imshow(s, cmap='plasma', extent = (0, 1, 0, 1))
         plt.colorbar()
         plt.show()
 
@@ -358,7 +354,7 @@ def main():
 
         SpinArray = SIRSarray(grid, n)
 
-        s = np.zeros((21,21))
+        s = np.zeros((41,41))
         print(s)
 
         p1 = 1.05
@@ -370,7 +366,7 @@ def main():
             p1 = round(p1, 3)
             p3 = -0.05
 
-            for m in range(21):
+            for m in range(41):
 
                 p3 += 0.05
                 p3 = round(p3, 3)
@@ -387,11 +383,11 @@ def main():
 
                     if i > 100:
 
-                        I2.append(np.mean(convertion(SpinArray, n)))
+                        I2.append(convertion(SpinArray, n))
 
                 s[l, m] = np.var(I2)/(n*n)
 
-        plt.imshow(s, cmap='plasma', extent = (0,1,0,1))
+        plt.imshow(s, cmap='plasma', interpolation = 'gaussian', extent = (0,1,0,1))
         #print(s)
         plt.colorbar()
         plt.show()
