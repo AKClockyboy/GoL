@@ -12,6 +12,8 @@ def grid(n):
 
     grid = np.zeros((n,n))
 
+    return(grid)
+
 def array(grid,n):
 
     grid = np.random.choice(a=(0,1), size = (n,n), p = (0.5,0.5))
@@ -24,11 +26,33 @@ def SIRSarray(grid,n):
 
     return(grid)
 
+def bootstrap():
+
+    yerror = []
+
+    for i in range(len(self.temps)):
+        fakecap = []
+        fakeenergy = np.zeros([100,1000])
+        for j in range(100):
+            fakeenergy[j] = sklearn.utils.resample(enr[i],n_samples=1000)
+            emean = np.mean(fakeenergy[j])
+            N = self.length**2
+            T2 = self.temps[i]**2
+            esq = np.square(fakeenergy[j])
+            emeansq = np.square(emean)
+            esqmean = np.mean(esq)
+            ccc = (1.0/(N*T2))*(esqmean-emeansq)
+            fakecap.append(ccc)
+        oof = (np.square(np.mean(fakecap)))
+        ouch = (np.mean(np.square(fakecap)))
+        yerror.append((np.sqrt(ouch-oof)))
+    return()
+
 def SIRSarray_with_imun(grid, n, f):
 
-        grid = np.random.choice(a=(-1,0,1,2), size = (n,n), p = (1/3, 1/3, 1/3, f))
+    grid = np.random.choice(a=(-1,0,1,2), size = (n,n), p = (((1 - f)/3), ((1 - f)/3), ((1 - f)/3), f))
 
-        return(grid)
+    return(grid)
 
 def glide(grid,n):
 
@@ -68,6 +92,7 @@ def plot(x, y):
 
     plt.plot(x, y)
     plt.show()
+    return()
 
 def trial(p1):
 
@@ -80,21 +105,24 @@ def trial(p1):
 
 def histo(a):
 
-    plt.hist(a, bins = 'auto')
+    plt.hist(a, bins = 15)
     plt.title("Histogram")
     plt.show()
 
     return()
 
 def convertion(SpinArray, n):
+
+    immo_no = 0
+
     for i in range(n):
         for j in range(n):
-            if SpinArray[i, j] == -1:
-                SpinArray[i, j] = 0
+            if SpinArray[i, j] == 1:
+                immo_no += 1
 
-    x = np.sum(SpinArray)
+    x = immo_no
 
-    return(x)
+    return(immo_no)
 
 def GoL(sweep, SpinArray, n):
 
@@ -116,8 +144,7 @@ def GoL(sweep, SpinArray, n):
                     newspin[i, j] = 1
                 elif sum != 3:
                     newspin[i, j] = 0
-
-    return(newspin)
+            printAAARAYreturn(newspin)
 
 def SIRS(sweep, SpinArray, p1, p2, p3, n):
 
@@ -187,6 +214,7 @@ def com(grid, n):
     return(x/np.sum(grid))
 
 def main():
+
     if len(sys.argv)!=7:
         print("Wrong number of arguments.")
         print("Usage: " + sys.argv[0] + " 'gol', 'golglide', 'CountDooku', 'sir' " + "sweep" + " system_size" + " p1" + " p2" + " p3")
@@ -199,7 +227,6 @@ def main():
         p1 = float(sys.argv[4])
         p2 = float(sys.argv[5])
         p3 = float(sys.argv[6])
-
 
     g = grid(n)
 
@@ -252,6 +279,7 @@ def main():
     if dynamic == 'countdooku':
 
         time_list = np.zeros(100)
+
         print(time_list)
 
         for j in range(100):
@@ -277,11 +305,11 @@ def main():
                 else:
                     c = 0
 
-                if i > 2000:
+                #if i > 1500:
 
-                    break
+                    #break
 
-                if c == 5:
+                if c == 10:
 
                     t = i
 
@@ -289,7 +317,11 @@ def main():
 
                 SpinArray = emptar
 
+
+
             time_list[j] = t
+
+            np.save('histogram_time', time_list)
 
         histo(time_list)
 
@@ -338,13 +370,15 @@ def main():
 
                     SpinArray = emptar[i]
 
-                    if i > 500:
+                    if i > 100:
 
                         I2.append(convertion(SpinArray, n))
 
                 print("L is " + str(l) + " M is " + str(m))
 
                 s[l, m] = (np.mean(I2))/(n*n)
+
+        np.save('av_heatmap',s)
 
         plt.imshow(s, cmap='plasma', extent = (0, 1, 0, 1))
         plt.colorbar()
@@ -354,7 +388,7 @@ def main():
 
         SpinArray = SIRSarray(grid, n)
 
-        s = np.zeros((41,41))
+        s = np.zeros((21,21))
         print(s)
 
         p1 = 1.05
@@ -366,7 +400,7 @@ def main():
             p1 = round(p1, 3)
             p3 = -0.05
 
-            for m in range(41):
+            for m in range(21):
 
                 p3 += 0.05
                 p3 = round(p3, 3)
@@ -387,22 +421,23 @@ def main():
 
                 s[l, m] = np.var(I2)/(n*n)
 
-        plt.imshow(s, cmap='plasma', interpolation = 'gaussian', extent = (0,1,0,1))
-        #print(s)
+        np.save('var_heatmap', s)
+        plt.imshow(s, cmap='plasma', extent = (0,1,0,1))
         plt.colorbar()
         plt.show()
 
     if dynamic == 'sirvar2':
+
         p3 = 0.5
         p2 = 0.5
-        p1 = 0.15
+        p1 = 0.0
 
         var_list = []
         p1_list = []
 
         for l in range(20):
 
-            p1 += 0.02
+            p1 += 0.05
             p1 = round(p1, 3)
 
             print("p1 is: " + str(p1))
@@ -422,7 +457,47 @@ def main():
 
             var_list.append(np.var(I2)/(n*n))
 
+        np.save('var_cut', var_list)
+
         plot(p1_list, var_list)
 
+    if dynamic == 'FINALE':
+
+        emptar = np.zeros((sweep,n,n))
+
+        I1 = []
+
+        f_list = []
+
+        f = 0
+
+        for l in range(5):
+
+            f += 0.1
+
+            print(f)
+
+            f_list.append(f)
+
+            I2 = []
+
+            for m in range(10):
+
+                AAARAY = SIRSarray_with_imun(grid, n, f)
+                print(AAARAY)
+
+                for i in range(sweep):
+
+                    emptar[i] = SIRSinf(sweep, AAARAY, p1, p2, p3, n, I1)
+
+                    AAARAY = np.array(emptar[i])
+
+                    if i > 100:
+
+                        I2.append(convertion(AAARAY, n))
+
+            I1.append(np.mean(I2)/n*n)
+
+        plot(f_list, I1)
 
 main()
