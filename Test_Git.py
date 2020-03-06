@@ -430,14 +430,15 @@ def main():
 
         p3 = 0.5
         p2 = 0.5
-        p1 = 0.0
+        p1 = 0.2
 
         var_list = []
         p1_list = []
 
-        for l in range(20):
+        for l in range(30):
 
-            p1 += 0.05
+            p1 += 0.01
+
             p1 = round(p1, 3)
 
             print("p1 is: " + str(p1))
@@ -447,7 +448,9 @@ def main():
             I2 = []
 
             p1_list.append(p1)
+
             for i in range(sweep):
+
                 emptar[i] = SIRS(sweep, SpinArray, p1, p2, p3, n)
                 SpinArray = emptar[i]
 
@@ -457,7 +460,8 @@ def main():
 
             var_list.append(np.var(I2)/(n*n))
 
-        np.save('var_cut', var_list)
+        np.save('var_cutathome', var_list)
+        np.save('p1athome', p1_list)
 
         plot(p1_list, var_list)
 
@@ -471,20 +475,22 @@ def main():
 
         f = 0
 
-        for l in range(5):
+        for l in range(100):
 
-            f += 0.1
-
+            f += 0.01
+            f = round(f, 3)
             print(f)
 
             f_list.append(f)
 
             I2 = []
 
-            for m in range(10):
+            for m in range(5):
+
+                c = 0
 
                 AAARAY = SIRSarray_with_imun(grid, n, f)
-                print(AAARAY)
+                #print(AAARAY)
 
                 for i in range(sweep):
 
@@ -496,7 +502,11 @@ def main():
 
                         I2.append(convertion(AAARAY, n))
 
+
             I1.append(np.mean(I2)/n*n)
+
+            np.save('FINALEathome', I1)
+            np.save('f_listathome', f_list)
 
         plot(f_list, I1)
 
